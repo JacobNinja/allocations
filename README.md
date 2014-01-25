@@ -9,12 +9,24 @@ Doing so will enable real time allocation profiling of YOUR rails application.
 
 ## Recommended:
 1. Ruby 2.1
-1. Lots of RAM
+2. Lots of RAM
 
 ## Setup:
-1. ```bundle install```
-1. ```rails s```
+1. `bundle install`
+2. `rails s`
 
-## What do I do?
-1. Load ```http://localhost:3000```
-1. Click 'Start instrumentation'
+## How do I get started?
+1. Load `http://localhost:3000`
+2. Click 'Start instrumentation'
+3. Review graph; nodes represent objects, edges represent references. The thicker the edge, the more references between objects.
+4. Click 'Test'
+5. Notice how the graph aggregates data over many requests...lines get thicker.
+
+## How do I profile something else?
+Be careful not to broaden the scope or depth of recursion too much. Currently, it is easy to overload your browser with events.
+* `ApplicationController#test` is the code executed when clicking 'Test'.
+* `ApplicationController#object_space_scope` will scope the graph to only the descendants of the class provided.
+* `ApplicationController#max_object_space_depth` determines how many levels of recursion to profile from `object_space_scope`.
+
+## TODO
+* Buffer streamed events to reduce websocket overload.

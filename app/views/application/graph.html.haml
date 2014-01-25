@@ -3,6 +3,12 @@
   = link_to 'Stop instrumentation', stop_path, remote: true
   = link_to 'Test', test_path, remote: true
   = link_to 'Clear', '#', class: 'clear'
+  %span Events:
+  %span#read-count 0
+  %span Nodes:
+  %span#node-count 0
+  %span Edges:
+  %span#link-count 0
 
 %svg#graph
 

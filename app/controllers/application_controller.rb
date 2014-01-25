@@ -12,13 +12,21 @@ class ApplicationController < ActionController::Base
     render text: 'create some string'
   end
 
+  def object_space_scope
+    ActionView::Base
+  end
+
+  def max_object_space_depth
+    3
+  end
+
   def start
     ActiveSupport::Notifications.subscribe('start_processing.action_controller') do |*args|
       GC.disable
     end
     ActiveSupport::Notifications.subscribe('process_action.action_controller') do |*args|
       if Rails.stream.connected?
-        ObjectSpace.each_object(ActionView::Base) do |obj|
+        ObjectSpace.each_object(object_space_scope) do |obj|
           stream_object_data! obj
         end
       end
@@ -55,7 +63,7 @@ class ApplicationController < ActionController::Base
   private
 
   def stream_object_data!(obj, depth=0)
-    if depth >= 3
+    if depth >= max_object_space_depth
       references = []
     else
       references = ObjectSpace.reachable_objects_from(obj).map {|r| stream_object_data!(r, depth + 1) }

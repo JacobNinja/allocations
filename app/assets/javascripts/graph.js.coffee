@@ -7,10 +7,10 @@ $ ->
   height = window.innerHeight - distance - 10
 
   window.graph = new GraphData()
-  stream = new Stream(window.websocket_url, graph)
-  stream.connect()
+  window.stream = new Stream(window.websocket_url, graph)
+  window.stream.connect()
 
-  redraw = =>
+  redrawGraph = =>
     svg = d3.select('#graph').attr('height', height).attr('width', width)
     force = d3.layout.force().gravity(0).distance(distance).charge(0).size([width, height])
 
@@ -29,10 +29,16 @@ $ ->
         "translate(#{d.x},#{d.y})"
     force.nodes(graph.serializeNodes()).links(graph.serializeLinks()).start()
 
-  redraw()
+  redrawGraph()
+
+  updateCounts = ->
+    $("#read-count").html(window.stream.readCount)
+    $("#node-count").html(window.graph.nodeCount)
+    $("#link-count").html(window.graph.linkCount)
 
   setInterval ->
     $('#graph').remove()
     $('body').append("<svg id='graph'></svg>")
-    redraw()
+    redrawGraph()
+    updateCounts()
   , 1500
