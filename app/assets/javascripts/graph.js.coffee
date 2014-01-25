@@ -3,8 +3,8 @@ $ ->
   return unless document.getElementById('graph')
 
   distance = 150
-  width = window.innerWidth - distance - 10
-  height = window.innerHeight - distance - 10
+  width = window.innerWidth  - 10
+  height = window.innerHeight - 10
 
   window.graph = new GraphData()
   window.stream = new Stream(window.websocket_url, graph)
@@ -24,7 +24,7 @@ $ ->
       link.attr 'y1', (d) -> d.source.y
       link.attr 'x2', (d) -> d.target.x
       link.attr 'y2', (d) -> d.target.y
-      link.attr('stroke-width', (d) -> d.value)
+      link.attr 'stroke-width', (d) -> d.value
       node.attr 'transform', (d) ->
         "translate(#{d.x},#{d.y})"
     force.nodes(graph.serializeNodes()).links(graph.serializeLinks()).start()

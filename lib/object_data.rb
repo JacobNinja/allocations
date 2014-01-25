@@ -2,14 +2,15 @@ class ObjectData
 
   attr_reader :klass, :id, :references
 
-  def initialize(klass, id, references=[])
+  def initialize(cluster, klass, id, references=[])
     @klass = klass
     @id = id
-    @references = references
+    @references = references.reject {|r| r.klass == 'Class' }
+    @cluster = cluster
   end
 
   def to_h
-    {klass: @klass, object_id: @id, references: @references.map(&:to_h)}
+    {cluster: @cluster, klass: @klass, object_id: @id, references: @references.map(&:to_h)}
   end
 
   def to_json

@@ -7,17 +7,18 @@ class window.GraphData
     @nodeCount = 0
 
   append: (data) ->
-    parent = @createNode(data.klass)
+    parent = @createNode(data.klass, data.cluster)
     for reference in data.references
-      child = @createNode(reference.klass)
+      child = @createNode(reference.klass, data.cluster)
       @createLink(parent, child)
     null
 
-  createNode: (klass) ->
-    unless @nodes[klass]
-      @nodes[klass] = {name: klass, group: @nodeCount}
+  createNode: (klass, cluster) ->
+    key = "#{klass}-#{cluster}"
+    unless @nodes[key]
+      @nodes[key] = {cluster: cluster, name: klass, group: @nodeCount}
       @nodeCount += 1
-    @nodes[klass]
+    @nodes[key]
 
   createLink: (parent, child) ->
     link_key = "#{parent.name}-#{child.name}"

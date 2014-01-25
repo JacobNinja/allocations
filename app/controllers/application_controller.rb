@@ -1,6 +1,19 @@
 require 'objspace'
 require 'graph_data'
 
+class Spaghetti
+  def initialize
+    @c = 10.times.map { Coupling1.new }
+    @c2 = Coupling2.new
+  end
+end
+
+class Coupling1
+end
+
+class Coupling2
+end
+
 class ApplicationController < ActionController::Base
 
   include Tubesock::Hijack
@@ -8,16 +21,17 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   def test
+    Spaghetti.new
     100.times {|n| "#{n}foo" }
     render text: 'create some string'
   end
 
-  def object_space_scope
-    ActionView::Base
+  def object_space_scopes
+    [Spaghetti]
   end
 
   def max_object_space_depth
-    3
+    2
   end
 
   def start
@@ -26,8 +40,10 @@ class ApplicationController < ActionController::Base
     end
     ActiveSupport::Notifications.subscribe('process_action.action_controller') do |*args|
       if Rails.stream.connected?
-        ObjectSpace.each_object(object_space_scope) do |obj|
-          stream_object_data! obj
+        object_space_scopes.each do |scope|
+          ObjectSpace.each_object(scope) do |obj|
+            stream_object_data! obj, scope
+          end
         end
       end
       GC.enable
@@ -40,10 +56,6 @@ class ApplicationController < ActionController::Base
     ActiveSupport::Notifications.unsubscribe('start_processing.action_controller')
     ActiveSupport::Notifications.unsubscribe('process_action.action_controller')
     head :ok
-  end
-
-  def index
-    @objects = ObjectSpace.each_object(ActionController::Base)
   end
 
   def graph
@@ -62,14 +74,14 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def stream_object_data!(obj, depth=0)
+  def stream_object_data!(obj, scope, depth=0)
     if depth >= max_object_space_depth
       references = []
     else
-      references = ObjectSpace.reachable_objects_from(obj).map {|r| stream_object_data!(r, depth + 1) }
+      references = ObjectSpace.reachable_objects_from(obj).map {|r| stream_object_data!(r, scope, depth + 1) }
     end
-    ObjectData.new(obj.class.to_s, obj.object_id, references).tap do |object_data|
-      Rails.stream.write object_data.to_json
+    ObjectData.new(scope.to_s, obj.class.to_s, obj.object_id, references).tap do |object_data|
+      Rails.stream.write object_data.to_json unless object_data.klass == "Class"
     end
   end
 end

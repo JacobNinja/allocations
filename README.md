@@ -30,3 +30,7 @@ Be careful not to broaden the scope or depth of recursion too much. Currently, i
 
 ## TODO
 * Buffer streamed events to reduce websocket overload.
+* Don't show the data objects (Array), show the link from the parent to
+  child
+* Filter classes
+* Clicking nodes shows callers
